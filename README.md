@@ -1,4 +1,4 @@
 # workshop-scs-s1p
-2019 Spring One Platform Workshop
+SpringOne Platform 2019 Workshop
 
 # Coming Soon!
