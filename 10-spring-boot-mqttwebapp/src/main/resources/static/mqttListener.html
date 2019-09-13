@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Workshop MQTT WebApp</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+  <style>
+    p {
+      margin: 0px;
+      font-family: "Lucida Console", "Inconsolata", monospace;
+      font-size:90%;
+      color: #00CB95
+    }
+    h2 {
+      margin: 0px;
+      font-family: Arial, sans-serif;
+      color: #00CB95
+    }
+    hr {
+      border-color: #00CB95;
+    }
+    #div_tl {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      z-index: 99;
+      background-color: rgba(255, 255, 255, 0);
+      padding: 10px;
+    }
+    .button {
+      background-color: #00CB95;
+      border: none;
+      color: #333333;
+      padding: 5px 30px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body style="background-color: #333333">
+<div id="div_tl">
+  <button id="button" class="button" onClick="pause();">Pause</button>
+</div>
+<h2>MQTT Web App - Entire Class Tweets</h2>
+
+<script>
+
+  // TODO - UPDATE CREDENTIALS, HOSTS, PORT, TOPIC BELOW!!
+  const LINES_TO_SHOW = 50;
+  var isPaused = false;
+  var topicSub = "tweets/stream/+/nofeatures/noyelling/positive";
+  var host = "localhost";
+  var port = 8000; //8443;
+  var username = "default";
+  var password = "default";
+  var useSSL = false; //true; 
+  var client_id = ""+(Math.random() + 1).toString(36).substring(2,10);  // 8 "random" [0-9a-z]
+  client = new Paho.MQTT.Client(host,Number(port),client_id);
+
+  // set callback handlers
+  client.onConnectionLost = onConnectionLost;
+  client.onMessageArrived = onMessageArrived;
+
+  // connect the client
+  connectOptions = { };
+  connectOptions["useSSL"] = useSSL;
+  connectOptions["userName"] = username;
+  connectOptions["password"] = password;
+  connectOptions["onSuccess"] = onConnect;
+  writeToScreen("Connecting to PubSub+ ...");
+  client.connect(connectOptions);
+ 
+ // called when the client connects
+  function onConnect() {
+    writeToScreen("Connected and Ready to Receive Tweets!");
+    client.subscribe(topicSub);
+  }
+
+  // called when the client loses its connection
+  function onConnectionLost(responseObject) {
+    if (responseObject.errorCode !== 0) {
+      writeToScreen("onConnectionLost:"+responseObject.errorMessage);
+    }
+  }
+
+  // called when a message arrives
+  function onMessageArrived(message) {
+	if (!isPaused) {
+	   // only write to the screen if we're not paused; otherwise, throw away
+       var tweet = JSON.parse(message.payloadString);
+       writeToScreen("Tweet: topic='"+message.destinationName+"',&nbsp;@"+tweet.username+" -- '"+tweet.text+"'");
+	}
+  }
+
+ 
+  // write to screen
+  function writeToScreen(str) {
+    var node = document.createElement("p");
+    node.innerHTML = str;
+    document.body.appendChild(node);
+    // do we need to trim the list?
+    var paragraphList = document.body.getElementsByTagName("p");
+    if (paragraphList.length > LINES_TO_SHOW) {
+      document.body.removeChild(paragraphList[0]);
+    }
+  }
+  
+  function pause() {
+    if (isPaused) {
+      //writeToScreen('...unpaused.'); 
+      isPaused = false;
+      document.getElementById('button').innerHTML = 'Pause';
+    } else {
+      writeToScreen('Pausing...'); 
+      isPaused = true;
+      document.getElementById('button').innerHTML = 'Unpause';
+    }
+  }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+spring:
+  cloud:
+    stream:
+      default-binder: solaceBroker
+      bindings:
+        input:
+          destination: TWEETS.Q
+          group: DYNAMICFEATURES.<ATTENDEE_NAME>
+      binders:
+        solaceBroker:
+          type: solace
+          environment:
+            solace:
+              java:
+                host: tcp://localhost:55555
+                msgVpn: default
+                clientUsername: default
+                clientPassword: default
+                connectRetries: 3
+                connectRetriesPerHost: 0
+                reconnectRetries: 3
+      solace:
+        bindings:
+          input:
+            consumer:
+              queueAdditionalSubscriptions: tweets/stream
+logging:
+  level:
+    root: INFO
+    com.solacesystems.jcsmp: INFO
+    org.springframework: INFO
+    
+server:
+  port: 8097

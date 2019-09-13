@@ -1,0 +1,103 @@
+---
+asyncapi: "2.0.0-rc1"
+id: "urn:qho6wzcfgx"
+info:
+  description: "This processor will receive inbound tweet events and remove \"yelling\"\
+    \ when a twitter user tweets in all capital letters. "
+  title: "scsprocessoryelling"
+  version: "0.0.1-SNAPSHOT"
+servers:
+  url: solace_url:55555
+  protocol: smf
+  description: Solace Cloud Broker
+  baseChannel: 
+  variables:
+    port:
+      description: Solace SMF Port.
+      default: '55555'
+      enum:
+        - '55555'
+channels:
+  tweets/stream/noyelling:
+    publish:
+      message:
+        $ref: "#/components/messages/NoYellingTweet"
+  tweets/stream:
+    subscribe:
+      message:
+        $ref: "#/components/messages/InboundTweet"
+components:
+  schemas:
+    Tweet:
+      $schema: "http://json-schema.org/draft-07/schema#"
+      description: "This object represents a Twitter Tweet and its associated metadata. "
+      type: "object"
+      title: "The Root Schema"
+      definitions: {}
+      required:
+      - "timestamp"
+      - "username"
+      - "text"
+      - "uuid"
+      - "hashtags"
+      - "userMentions"
+      properties:
+        hashtags:
+          type: "array"
+          title: "The Hashtags Schema"
+          items:
+            default: ""
+            examples:
+            - "#E6000"
+            pattern: "^(.*)$"
+            type: "string"
+            title: "The Items Schema"
+        text:
+          default: ""
+          examples:
+          - "I.absolutely.hate.my.#E6000.car..Period.."
+          pattern: "^(.*)$"
+          type: "string"
+          title: "The Text Schema"
+        userMentions:
+          type: "array"
+          title: "The Usermentions Schema"
+          items:
+            type: "string"
+        uuid:
+          default: ""
+          examples:
+          - "c963c37e-9ac2-44ec-9428-8f6481c941b7"
+          pattern: "^(.*)$"
+          type: "string"
+          title: "The Uuid Schema"
+        timestamp:
+          default: ""
+          examples:
+          - "2019-05-14T14:21:01.909+0000"
+          pattern: "^(.*)$"
+          format: "date-time"
+          type: "string"
+          title: "The Timestamp Schema"
+        username:
+          default: ""
+          examples:
+          - "HipHeinz"
+          pattern: "^(.*)$"
+          type: "string"
+          title: "The Username Schema"
+  messages:
+    InboundTweet:
+      headers: {}
+      payload:
+        $ref: "#/components/schemas/Tweet"
+      name: "InboundTweet"
+      description: "A tweet coming into the system"
+      title: "InboundTweet"
+    NoYellingTweet:
+      headers: {}
+      payload:
+        $ref: "#/components/schemas/Tweet"
+      name: "NoYellingTweet"
+      description: "A tweet event that has been purged of yelling."
+      title: "NoYellingTweet"

@@ -1,0 +1,5 @@
+---
+applications:
+- name: 07-scs-sink-bossideas-<ATTENDEE_NAME>
+  memory: 1024M
+  path: target/07-scs-sink-bossideas-0.0.1-SNAPSHOT.jar

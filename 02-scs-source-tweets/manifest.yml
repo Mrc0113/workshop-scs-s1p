@@ -1,0 +1,5 @@
+---
+applications:
+- name: 02-scs-source-tweets-<ATTENDEE_NAME>
+  memory: 1024M
+  path: target/02-scs-source-tweets-0.0.1-SNAPSHOT.jar

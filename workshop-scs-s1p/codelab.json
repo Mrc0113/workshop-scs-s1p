@@ -1,0 +1,28 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2019-10-04T11:38:46-04:00",
+  "id": "workshop-scs-s1p",
+  "duration": 130,
+  "title": "Developer Workshop: Be Event-Driven with AsyncAPI \u0026 Spring Cloud Stream",
+  "summary": "Be Event-Driven with AsyncAPI \u0026 Spring Cloud Stream",
+  "source": "codelab.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "spring",
+    "springcloudstreams",
+    "java",
+    "pws"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "github.com/Mrc0113/workshop-scs-s1p",
+  "ga": "UA-49880327-14",
+  "url": "workshop-scs-s1p"
+}

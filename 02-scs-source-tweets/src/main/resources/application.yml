@@ -1,0 +1,28 @@
+spring:
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination: tweets/stream
+          binder: solaceBroker
+      binders:
+        solace1:
+          type: solaceBroker
+          environment:
+            solace:
+              java:
+                host: tcp://localhost:55555
+                msgVpn: default
+                clientUsername: default
+                clientPassword: default
+                connectRetries: 3
+                connectRetriesPerHost: 0                
+                reconnectRetries: 3
+logging:
+  level:
+    root: INFO
+    com.solacesystems.jcsmp: INFO
+    org.springframework: INFO
+
+server:
+  port: 8095

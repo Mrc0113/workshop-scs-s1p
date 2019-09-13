@@ -1,0 +1,5 @@
+---
+applications:
+- name: 10-spring-boot-mqttwebapp-<ATTENDEE_NAME>
+  memory: 1024M
+  path: target/10-spring-boot-mqttwebapp-0.0.1-SNAPSHOT.jar
