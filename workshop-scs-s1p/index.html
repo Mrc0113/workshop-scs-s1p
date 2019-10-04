@@ -311,8 +311,9 @@ $ cf push
 <li>Add the <em>@EnableBinding(Sink.class)</em> annotation to label the app as a Sink</li>
 <li>Add a &#34;sink&#34; method that takes in a &#34;Tweet&#34; POJO from the INPUT channel and logs that it was received.</li>
 <li>Update the application.yml file and verify that there is indeed a destination &amp; group configured for the input channel. Note that by specifying a group we are now using the consumer group model. Since this application will likely do further processing in the future we want to provide the option of scaling up to keep up with the number of events that come in. Replace <code>&lt;ATTENDEE_NAME&gt;</code> with your username in BOTH spots</li>
+<li>While edding the application.yml fie be sure to also update your PubSub+ connection details</li>
 <li>At this point we have created our &#34;07-scs-sink-bossideas&#34; application and it needs to be deployed. Time to see if you&#39;ve been paying attention!</li>
-<li>Deploy the app in the same manner that you&#39;ve been deploying the others. (<strong>Don&#39;t forget to update the ATTENDEE_NAME and  solace service in the manifest.yml file to point to your PubSub+ service!</strong>)</li>
+<li>Deploy the app in the same manner that you&#39;ve been deploying the others. (<strong>Don&#39;t forget to update the </strong><code>&lt;ATTENDEE_NAME&gt;</code><strong> in the manifest.yml!</strong>)</li>
 </ul>
 <h2 is-upgraded>Update the Tweet Board Subscription</h2>
 <p>Note that our processor that we created earlier in this lab publishes to multiple topics essentially splitting our feed into two. Due to our new requirements to not show new features on the twitter board we need to update that sink appropriately.</p>
