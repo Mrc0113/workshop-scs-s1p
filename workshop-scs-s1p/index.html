@@ -122,7 +122,7 @@ $ mvn clean install
 <aside class="warning"><p>Spring Cloud Streams is built on top of Spring Boot. A great resource for creating your own Spring Boot applications is Spring Initializr. A publically hosted version is hosted here: <a href="https://start.spring.io" target="_blank">start.spring.io</a></p>
 </aside>
 <ul>
-<li>Next go ahead and open up the pom.xml file in your &#34;02-scs-source-tweets&#34; project and search for &#34;binder&#34;; you should have a dependency for either &#34;spring-cloud-starter-stream-solace&#34; or &#34;spring-cloud-stream-binder-solace&#34; which is what is going to allow SCS to connect to Solace PubSub+. &#34;spring-cloud-starter-stream-solace&#34; includes the &#34;spring-cloud-stream-binder-solace&#34; dependency which is why you could have either one. It is recommended to start with the starter.</li>
+<li>Next go ahead and open up the pom.xml file in your &#34;02-scs-source-tweets&#34; project and search for &#34;solace&#34;; you should have a dependency for either &#34;spring-cloud-starter-stream-solace&#34; or &#34;spring-cloud-stream-binder-solace&#34; which is what is going to allow SCS to connect to Solace PubSub+. &#34;spring-cloud-starter-stream-solace&#34; includes the &#34;spring-cloud-stream-binder-solace&#34; dependency which is why you could have either one. It is recommended to start with the starter.</li>
 <li>Note that the &#34;spring-cloud-stream-reactive&#34; dependency is only required for reactive streams support, but we will also discuss the use of &#34;Spring Cloud Function&#34; as an alternative in a later section.</li>
 </ul>
 <p class="image-container"><img alt="SCS Maven Dependencies" src="img/a3b8083e6b669c58.png"></p>
@@ -183,6 +183,12 @@ $ mvn clean install
 $ Password&gt; 
 </code></pre>
 </li>
+</ul>
+<h2 is-upgraded>Stop local microservices!</h2>
+<p>Stop the source &amp; sink that you currently have running locally as we are going to deploy them to PWS using the same PubSub+ instance and want to avoid duplicate messages.</p>
+<ul>
+<li>If using <em>Spring Tool Suite</em> as your IDE You can clicking the <strong>red</strong> stop button on the <code>console</code> view.</li>
+<li>If running using <em>maven</em> from the command line, use <code>ctrl-c</code> to stop the Spring Boot process.</li>
 </ul>
 <h2 is-upgraded>Deploy the Source to PWS</h2>
 <ul>
@@ -290,6 +296,9 @@ $ cf push
 <aside class="warning"><p>At this point you might be thinking &#34;Okay these custom binding interfaces are great, but what if I don&#39;t know how many or what to call my output channels at design time?&#34; Spring Cloud Streams supports the use of Dynamic Destinations for this exact situation!  Dynamic destinations allow you to use business logic to define your destinations at runtime.</p>
 </aside>
 <ul>
+<li>Since this microservice will duplicate the work that &#34;05-scs-processor-feature&#34; one is already doing let&#39;s go ahead and stop the previous microservice we deployed.</li>
+<li>If using <em>Spring Tool Suite</em>, do this by navigating to the <em>Boot Dashboard</em>, expanding our space, finding your application named <code>05-scs-processor-feature-&lt;ATTENDEE_NAME&gt;</code>, then right click and choose <code>stop</code></li>
+<li>If using the <em>cf cli</em> do this by executing the <code>cf stop 05-scs-processor-feature-&lt;ATTENDEE_NAME&gt;</code> command while of course switching out <code>&lt;ATTENDEE_NAME&gt;</code> for your username</li>
 <li>Let&#39;s create a second feature processor that makes use of dynamic destinations.</li>
 <li>Open the &#34;06-scs-processor-dynamicfeature&#34; project</li>
 <li>Open the <em>ScsProcessorFeaturesDynamic.java</em> class</li>
@@ -356,7 +365,7 @@ $ cf push
 <p>OR Navigate to <code>https://github.com/jschabowsky/AsyncAPI-Spring-Cloud-Streams-Generator</code>, click &#34;Clone or download&#34; -&gt; &#34;Download ZIP&#34; &amp; unzip in your desired directory</p>
 <h2 is-upgraded>Find the NoYellingProcessor AsyncAPI Specification File</h2>
 <p>This is an example AsyncAPI Specification file that defines our event-driven microservice.<br>It specifies information about the application such as servers where you can interact with the microservice, channels which messages are exchanged over, and components such as the messages that are expected and the schemas which define them.</p>
-<p>Under the <code>08-yellingArtifacts</code> directory you should find a file called <code>NoYellingProcessor.yaml</code><br>Open the file up and take a look at how the microservice is defined.</p>
+<p>In the git repo that you cloned you&#39;ll find a <code>08-yellingArtifacts</code> directory. Navigate to that directory (<strong>keep in mind this directory is not a maven project so it wouldn&#39;t have been imported into your IDE as one</strong>) and you should find a file called <code>NoYellingProcessor.yaml</code><br>Open the file up and take a look at how the microservice is defined using the AsyncAPI specification.</p>
 <h2 is-upgraded>Generate your SCS Project Skeleton</h2>
 <p>Now that you have cloned the necessary artifacts let&#39;s go ahead and generate the project skeleton!</p>
 <ul>
@@ -376,6 +385,9 @@ $ mvn clean install
 <aside class="warning"><p>Spring Cloud Function supports 3 types that conveniently map to our 3 SCS binding interfaces.<br>java.util.function.Function maps to a SCS Processor<br>java.util.function.Supplier maps to a SCS Source<br>java.util.function.Consumer maps to a SCS Sink</p>
 </aside>
 <p>Open the <em>ScsprocessoryellingApplication</em> class</p>
+<p>Add the <code>spring.cloud.stream.function.definition</code> argument to the <code>SpringApplication.run</code> command in the <code>main</code> method as seen below. This specifies which functional bean to bind to the external destination(s) exposed by the bindings.</p>
+<pre><code>SpringApplication.run(ScsprocessoryellingApplication.class, &#34;--spring.cloud.stream.function.definition=handleInboundTweet&#34;);
+</code></pre>
 <p>Update the <em>handleInboundTweet</em> method to change uppercase letters to lowercae letters in the tweet text using the reactive programming model; an example of this can be seen in the code snippet below.</p>
 <p>Note that although we still have the <em>@EnableBinding(Processor.class)</em> annotation we are now binding a bean of type &#34;java.util.function.Function&#34; to the external destinations exposed by the bindings by providing the spring.cloud.stream.function.definition property.</p>
 <pre><code>package com.solace.spring.cloud.streams.test;
@@ -397,25 +409,25 @@ import reactor.core.publisher.Flux;
 @SpringBootApplication
 @EnableBinding(Processor.class)
 public class ScsprocessoryellingApplication {
-	
-	private static final Logger logger = LoggerFactory.getLogger(ScsprocessoryellingApplication.class);
+    
+private static final Logger logger = LoggerFactory.getLogger(ScsprocessoryellingApplication.class);
 
-	public static void main(String[] args) {
-		// Defining the reactive function to bind to the INPUT channel of the Processor
-		SpringApplication.run(ScsprocessoryellingApplication.class, &#34;--spring.cloud.stream.function.definition=handleInboundTweet&#34;);
-	}
-	
-	@Bean
-	public Function&lt;Flux&lt;Tweet&gt;, Flux&lt;Tweet&gt;&gt; handleInboundTweet() {
-		return flux -&gt; flux
-				.doOnNext(t -&gt;logger.info(&#34;====Tweet BEFORE mapping: &#34; + t.toString()))
-				.map(t -&gt; { t.setText(t.getText().toLowerCase());
-					return t;
-					})
-				.doOnNext(t -&gt;logger.info(&#34;++++Tweet AFTER mapping: &#34; + t.toString()))
-				;
-	
-	}
+public static void main(String[] args) {
+    // Defining the reactive function to bind to the INPUT channel of the Processor
+    SpringApplication.run(ScsprocessoryellingApplication.class, &#34;--spring.cloud.stream.function.definition=handleInboundTweet&#34;);
+}
+    
+@Bean
+public Function&lt;Flux&lt;Tweet&gt;, Flux&lt;Tweet&gt;&gt; handleInboundTweet() {
+    return flux -&gt; flux
+            .doOnNext(t -&gt;logger.info(&#34;====Tweet BEFORE mapping: &#34; + t.toString()))
+            .map(t -&gt; { t.setText(t.getText().toLowerCase());
+                return t;
+                })
+            .doOnNext(t -&gt;logger.info(&#34;++++Tweet AFTER mapping: &#34; + t.toString()))
+            ;
+    
+}
 </code></pre>
 <aside class="special"><p>From the Spring docs, Spring Cloud Function allows you to &#34;Decouple the development lifecycle of business logic from any specific runtime target so that the same code can run as a web endpoint, a stream processor, or a task.&#34;  Read more here: <a href="https://spring.io/projects/spring-cloud-function" target="_blank">https://spring.io/projects/spring-cloud-function</a></p>
 </aside>

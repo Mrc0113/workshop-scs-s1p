@@ -6,8 +6,8 @@ spring:
           destination: tweets/stream
           binder: solaceBroker
       binders:
-        solace1:
-          type: solaceBroker
+        solaceBroker:
+          type: solace
           environment:
             solace:
               java:

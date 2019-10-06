@@ -131,7 +131,7 @@ Negative
 : Spring Cloud Streams is built on top of Spring Boot. A great resource for creating your own Spring Boot applications is Spring Initializr. A publically hosted version is hosted here: [start.spring.io](https://start.spring.io)
 
 ### 
-* Next go ahead and open up the pom.xml file in your "02-scs-source-tweets" project and search for "binder"; you should have a dependency for either "spring-cloud-starter-stream-solace" or "spring-cloud-stream-binder-solace" which is what is going to allow SCS to connect to Solace PubSub+. "spring-cloud-starter-stream-solace" includes the "spring-cloud-stream-binder-solace" dependency which is why you could have either one. It is recommended to start with the starter.
+* Next go ahead and open up the pom.xml file in your "02-scs-source-tweets" project and search for "solace"; you should have a dependency for either "spring-cloud-starter-stream-solace" or "spring-cloud-stream-binder-solace" which is what is going to allow SCS to connect to Solace PubSub+. "spring-cloud-starter-stream-solace" includes the "spring-cloud-stream-binder-solace" dependency which is why you could have either one. It is recommended to start with the starter.
 * Note that the "spring-cloud-stream-reactive" dependency is only required for reactive streams support, but we will also discuss the use of "Spring Cloud Function" as an alternative in a later section.
 
 ![SCS Maven Dependencies](images/ScsDependencies.png)
@@ -204,6 +204,12 @@ Follow the dialog prompts and fill in the username / password associated with yo
 $ cf login -a <API_URL> -u <USERNAME>
 $ Password> 
 ```
+
+### Stop local microservices! 
+Stop the source & sink that you currently have running locally as we are going to deploy them to PWS using the same PubSub+ instance and want to avoid duplicate messages. 
+
+* If using *Spring Tool Suite* as your IDE You can clicking the **red** stop button on the `console` view. 
+* If running using *maven* from the command line, use `ctrl-c` to stop the Spring Boot process.
 
 ### Deploy the Source to PWS
 
@@ -342,6 +348,9 @@ Negative
 
 ### 
 
+* Since this microservice will duplicate the work that "05-scs-processor-feature" one is already doing let's go ahead and stop the previous microservice we deployed. 
+- If using *Spring Tool Suite*, do this by navigating to the *Boot Dashboard*, expanding our space, finding your application named `05-scs-processor-feature-<ATTENDEE_NAME>`, then right click and choose `stop`
+- If using the *cf cli* do this by executing the `cf stop 05-scs-processor-feature-<ATTENDEE_NAME>` command while of course switching out `<ATTENDEE_NAME>` for your username
 * Let's create a second feature processor that makes use of dynamic destinations. 
 * Open the "06-scs-processor-dynamicfeature" project
 * Open the *ScsProcessorFeaturesDynamic.java* class
@@ -423,8 +432,8 @@ $ git clone git@github.com:jschabowsky/AsyncAPI-Spring-Cloud-Streams-Generator.g
 This is an example AsyncAPI Specification file that defines our event-driven microservice. 
 It specifies information about the application such as servers where you can interact with the microservice, channels which messages are exchanged over, and components such as the messages that are expected and the schemas which define them. 
 
-Under the `08-yellingArtifacts` directory you should find a file called `NoYellingProcessor.yaml`
-Open the file up and take a look at how the microservice is defined. 
+In the git repo that you cloned you'll find a `08-yellingArtifacts` directory. Navigate to that directory (**keep in mind this directory is not a maven project so it wouldn't have been imported into your IDE as one**) and you should find a file called `NoYellingProcessor.yaml`
+Open the file up and take a look at how the microservice is defined using the AsyncAPI specification. 
 
 ### Generate your SCS Project Skeleton
 Now that you have cloned the necessary artifacts let's go ahead and generate the project skeleton! 
@@ -459,6 +468,10 @@ Negative
  java.util.function.Consumer maps to a SCS Sink
 
 * Open the *ScsprocessoryellingApplication* class
+* Add the `spring.cloud.stream.function.definition` argument to the `SpringApplication.run` command in the `main` method as seen below. This specifies which functional bean to bind to the external destination(s) exposed by the bindings.
+- ``` java
+SpringApplication.run(ScsprocessoryellingApplication.class, "--spring.cloud.stream.function.definition=handleInboundTweet");
+```
 * Update the *handleInboundTweet* method to change uppercase letters to lowercae letters in the tweet text using the reactive programming model; an example of this can be seen in the code snippet below. 
 * Note that although we still have the *@EnableBinding(Processor.class)* annotation we are now binding a bean of type "java.util.function.Function" to the external destinations exposed by the bindings by providing the spring.cloud.stream.function.definition property.
 

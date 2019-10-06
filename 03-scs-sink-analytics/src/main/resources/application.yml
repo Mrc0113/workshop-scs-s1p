@@ -6,17 +6,17 @@ spring:
           destination: TWEETS.Q
           binder: solaceBroker
           #The presence of "group" tells the binder to follow the "consumer group" pattern
-          group: <ATTENDEE_NAME>
+          group: user00
       binders:
         solaceBroker:
           type: solace
           environment:
             solace:
               java:
-                host: tcp://localhost:55555
-                msgVpn: default
-                clientUsername: default
-                clientPassword: default
+                host: tcp://mrzpfs1b9tj1n.messaging.solace.cloud:20032
+                msgVpn: msgvpn-155kxo97j74h
+                clientUsername: solace-cloud-client
+                clientPassword: g57s43f6s4ca4fci36ijckigvh
                 connectRetries: 3
                 connectRetriesPerHost: 0
                 reconnectRetries: 3

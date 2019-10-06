@@ -1,5 +1,5 @@
 ---
 applications:
-- name: 03-scs-sink-analytics-<ATTENDEE_NAME>
+- name: 03-scs-sink-analytics-user00
   memory: 1024M
   path: target/03-scs-sink-analytics-0.0.1-SNAPSHOT.jar
